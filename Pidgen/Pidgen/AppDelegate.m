@@ -15,7 +15,10 @@
 #include <arpa/inet.h>
 
 CFSocketRef atsocket;
-struct sockaddr_in addr;
+struct sockaddr_in ataddr;
+
+CFSocketRef navsocket;
+struct sockaddr_in navaddr;
 
 void gamepadWasAdded(void* inContext, IOReturn inResult,
                      void* inSender, IOHIDDeviceRef device);
@@ -112,17 +115,46 @@ int pcmdflags =  (1 << 1) | 1;
     refflags = (flying << 9) | (emergencyBit << 8);
     sprintf(buf,fmt,count,refflags,count+1,pcmdflags,*(int*)&roll,*(int*)&pitch,*(int*)&power,*(int*)&yaw);
     
-    if(count/2 % 50 == 0) //roughly every second, see what we are printing
-        NSLog(@"%s\n",buf);
+    NSData * data = [NSData dataWithBytes:buf length:strlen(buf)+1];
+    NSData * destinationAddressData = [NSData dataWithBytes:&ataddr length:sizeof(ataddr)];
     
-    CFDataRef data = CFDataCreate(NULL, (const UInt8*)buf, strlen(buf) + 1);
-    NSData * destinationAddressData = [NSData dataWithBytes:&addr length:sizeof(addr)];
-    int result = CFSocketSendData(atsocket,(CFDataRef)destinationAddressData, data, 0);
+    if(count/2 % 50 == 0) {//roughly every second, see what we are printing
+        NSLog(@"%s\n",buf);
+        struct sockaddr_in myself;
+        initAddress(&myself, "127.0.0.1", 5557);
+        NSData * destinationAddressData2 = [NSData dataWithBytes:&myself length:sizeof(struct sockaddr_in)];
+        if(CFSocketSendData(navsocket,(CFDataRef)destinationAddressData2, (CFDataRef) data, 0))
+            NSLog(@"send error");
+    }
+    
+    
+    int result = CFSocketSendData(atsocket,(CFDataRef)destinationAddressData, (CFDataRef) data, 0);
     count+=2;
     if (result != 0) {
         NSLog(@"BROKEN\n");
     }
 }
+
+void initAddress(struct sockaddr_in * addr, const char * ip, int port) {
+    memset(addr,0,sizeof(struct sockaddr_in));
+    addr->sin_len = sizeof(struct sockaddr_in);
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons(port);
+    inet_aton(ip,&addr->sin_addr);
+}
+
+void socketDataReceive(CFSocketRef s, CFSocketCallBackType type, CFDataRef address, const void *data, void *info) {
+    char buf[512];
+    int sock = CFSocketGetNative(s);
+    int addrlen;
+    struct sockaddr_in addr;
+    if (recvfrom(sock, buf, 512, 0, &addr, &addrlen) == -1) {
+        NSLog(@"recvfrom error");
+    }
+    NSLog(@"SOCKET DATA: %s\n",buf);
+
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     // Insert code here to initialize your application
@@ -162,12 +194,26 @@ int pcmdflags =  (1 << 1) | 1;
     atsocket = CFSocketCreate(kCFAllocatorDefault, PF_INET, SOCK_DGRAM, IPPROTO_UDP, 0, NULL, NULL);
     assert(socket);
     
-    memset(&addr,0,sizeof(addr));
+    initAddress(&ataddr,"192.168.1.1", 5556);
     
-    addr.sin_len = sizeof(addr);
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(5556);
-    inet_aton("192.168.1.1",&addr.sin_addr);
+    //TODO: set callback
+    //TODO: navport is NOT CORRECT
+#define NAVPORT 5557
+
+    navsocket = CFSocketCreate(kCFAllocatorDefault, PF_INET, SOCK_DGRAM, IPPROTO_UDP, kCFSocketReadCallBack, socketDataReceive, NULL);
+    assert(socket);
+    struct sockaddr_in myself;
+    initAddress(&myself, "127.0.0.1", NAVPORT);
+    myself.sin_addr.s_addr = htonl(INADDR_ANY);
+    int nativenavsocket = CFSocketGetNative(navsocket);
+    if(bind(nativenavsocket,&myself,sizeof(struct sockaddr_in))) {
+        NSLog(@"failed to bind");
+    }
+    
+    initAddress(&navaddr, "192.168.1.1", NAVPORT);
+    
+    CFRunLoopSourceRef rlr = CFSocketCreateRunLoopSource(NULL, navsocket, 0);
+    CFRunLoopAddSource(CFRunLoopGetCurrent(), rlr, kCFRunLoopDefaultMode);
     
     [NSTimer scheduledTimerWithTimeInterval:0.02
                                  target:self
