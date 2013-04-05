@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C63E54DE170E5A0200DB8E4E /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = C63E54D7170E5A0200DB8E4E /* Credits.rtf */; };
+		C63E54DF170E5A0200DB8E4E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C63E54D9170E5A0200DB8E4E /* InfoPlist.strings */; };
+		C63E54E0170E5A0200DB8E4E /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C63E54DB170E5A0200DB8E4E /* MainMenu.xib */; };
 		C6408055170CE0E900D6B9F7 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C6408054170CE0E900D6B9F7 /* IOKit.framework */; };
 		C6E5E875170C00F800888C64 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C6E5E874170C00F800888C64 /* Cocoa.framework */; };
 		C6E5E87F170C00F800888C64 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C6E5E87D170C00F800888C64 /* InfoPlist.strings */; };
@@ -17,6 +20,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C63E54D8170E5A0200DB8E4E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = Credits.rtf; sourceTree = "<group>"; };
+		C63E54DA170E5A0200DB8E4E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = InfoPlist.strings; sourceTree = "<group>"; };
+		C63E54DC170E5A0200DB8E4E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = MainMenu.xib; sourceTree = "<group>"; };
+		C63E54DD170E5A0200DB8E4E /* navdata_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = navdata_common.h; sourceTree = "<group>"; };
 		C6408054170CE0E900D6B9F7 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = ../../../System/Library/Frameworks/IOKit.framework; sourceTree = "<group>"; };
 		C6E5E871170C00F800888C64 /* Pidgen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pidgen.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6E5E874170C00F800888C64 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -46,6 +53,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C63E54D6170E5A0200DB8E4E /* en.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				C63E54D7170E5A0200DB8E4E /* Credits.rtf */,
+				C63E54D9170E5A0200DB8E4E /* InfoPlist.strings */,
+				C63E54DB170E5A0200DB8E4E /* MainMenu.xib */,
+			);
+			path = en.lproj;
+			sourceTree = "<group>";
+		};
 		C6E5E868170C00F800888C64 = {
 			isa = PBXGroup;
 			children = (
@@ -86,6 +103,8 @@
 		C6E5E87A170C00F800888C64 /* Pidgen */ = {
 			isa = PBXGroup;
 			children = (
+				C63E54D6170E5A0200DB8E4E /* en.lproj */,
+				C63E54DD170E5A0200DB8E4E /* navdata_common.h */,
 				C6E5E886170C00F800888C64 /* AppDelegate.h */,
 				C6E5E887170C00F800888C64 /* AppDelegate.m */,
 				C6E5E889170C00F800888C64 /* MainMenu.xib */,
@@ -160,6 +179,9 @@
 				C6E5E87F170C00F800888C64 /* InfoPlist.strings in Resources */,
 				C6E5E885170C00F800888C64 /* Credits.rtf in Resources */,
 				C6E5E88B170C00F800888C64 /* MainMenu.xib in Resources */,
+				C63E54DE170E5A0200DB8E4E /* Credits.rtf in Resources */,
+				C63E54DF170E5A0200DB8E4E /* InfoPlist.strings in Resources */,
+				C63E54E0170E5A0200DB8E4E /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,6 +200,30 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		C63E54D7170E5A0200DB8E4E /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C63E54D8170E5A0200DB8E4E /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		C63E54D9170E5A0200DB8E4E /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C63E54DA170E5A0200DB8E4E /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		C63E54DB170E5A0200DB8E4E /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C63E54DC170E5A0200DB8E4E /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
 		C6E5E87D170C00F800888C64 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (

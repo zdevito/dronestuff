@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "navdata_common.h"
 
 CFSocketRef atsocket;
 struct sockaddr_in ataddr;
@@ -120,11 +121,13 @@ int pcmdflags =  (1 << 1) | 1;
     
     if(count/2 % 50 == 0) {//roughly every second, see what we are printing
         NSLog(@"%s\n",buf);
+        #if 0
         struct sockaddr_in myself;
-        initAddress(&myself, "127.0.0.1", 5557);
+        initAddress(&myself, "127.0.0.1", 5554);
         NSData * destinationAddressData2 = [NSData dataWithBytes:&myself length:sizeof(struct sockaddr_in)];
         if(CFSocketSendData(navsocket,(CFDataRef)destinationAddressData2, (CFDataRef) data, 0))
             NSLog(@"send error");
+        #endif
     }
     
     
@@ -133,6 +136,14 @@ int pcmdflags =  (1 << 1) | 1;
     if (result != 0) {
         NSLog(@"BROKEN\n");
     }
+
+    const char * somedata = "1";
+    NSData * data2 = [NSData dataWithBytes:somedata length:1];
+    NSData * destinationAddressData2 = [NSData dataWithBytes:&navaddr length:sizeof(struct sockaddr_in)];
+    if( 0 != CFSocketSendData(navsocket,(CFDataRef)destinationAddressData2, (CFDataRef) data2, 0)) {
+        NSLog(@"Error sending data to nav port");
+    }
+
 }
 
 void initAddress(struct sockaddr_in * addr, const char * ip, int port) {
@@ -148,10 +159,11 @@ void socketDataReceive(CFSocketRef s, CFSocketCallBackType type, CFDataRef addre
     int sock = CFSocketGetNative(s);
     int addrlen;
     struct sockaddr_in addr;
-    if (recvfrom(sock, buf, 512, 0, &addr, &addrlen) == -1) {
+    ssize_t len = recvfrom(sock, buf, 512, 0, &addr, &addrlen);
+    if (len == -1) {
         NSLog(@"recvfrom error");
     }
-    NSLog(@"SOCKET DATA: %s\n",buf);
+    NSLog(@"SOCKET DATA: %d\n",(int)len);
 
 }
 
@@ -197,23 +209,38 @@ void socketDataReceive(CFSocketRef s, CFSocketCallBackType type, CFDataRef addre
     initAddress(&ataddr,"192.168.1.1", 5556);
     
     //TODO: set callback
-    //TODO: navport is NOT CORRECT
-#define NAVPORT 5557
+#define NAVPORT 5554
 
     navsocket = CFSocketCreate(kCFAllocatorDefault, PF_INET, SOCK_DGRAM, IPPROTO_UDP, kCFSocketReadCallBack, socketDataReceive, NULL);
     assert(socket);
     struct sockaddr_in myself;
-    initAddress(&myself, "127.0.0.1", NAVPORT);
-    myself.sin_addr.s_addr = htonl(INADDR_ANY);
+    initAddress(&myself, "0.0.0.0", NAVPORT);
     int nativenavsocket = CFSocketGetNative(navsocket);
+
+  // set group
+    struct ip_mreq mreq;
+    bzero(&mreq,sizeof(struct ip_mreq));
+  
+    mreq.imr_multiaddr.s_addr = inet_addr("224.1.1.1");
+    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+     
+   
+    if(setsockopt(nativenavsocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq))) {
+        NSLog(@"setsockopts failed");
+    }
+    
     if(bind(nativenavsocket,&myself,sizeof(struct sockaddr_in))) {
         NSLog(@"failed to bind");
     }
     
+    
     initAddress(&navaddr, "192.168.1.1", NAVPORT);
+    
+   
     
     CFRunLoopSourceRef rlr = CFSocketCreateRunLoopSource(NULL, navsocket, 0);
     CFRunLoopAddSource(CFRunLoopGetCurrent(), rlr, kCFRunLoopDefaultMode);
+    
     
     [NSTimer scheduledTimerWithTimeInterval:0.02
                                  target:self
